@@ -6,31 +6,28 @@ import pyotp, qrcode, os
 from datetime import timedelta
 from dotenv import load_dotenv
 
-# Load environment variables
 load_dotenv()
 
 app = Flask(__name__)
 
-# Database Configuration (Using XAMPP MySQL)
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("DATABASE_URL", 'mysql+pymysql://root@127.0.0.1/data_integrity')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['JWT_SECRET_KEY'] = os.getenv("JWT_SECRET", "supersecret")
 app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(minutes=10)
 
-# Initialize Extensions
 db = SQLAlchemy(app)
 bcrypt = Bcrypt(app)
 jwt = JWTManager(app)
 
 class User(db.Model):
-    __tablename__ = 'users'  # Ensure correct table name
+    __tablename__ = 'users'  
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     username = db.Column(db.String(50), unique=True, nullable=False)
     password = db.Column(db.String(256), nullable=False)
     twofa_secret = db.Column(db.String(256), nullable=False)
 
 class Product(db.Model):
-    __tablename__ = 'products'  # Ensure correct table name
+    __tablename__ = 'products'  
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     name = db.Column(db.String(100), nullable=False)
     description = db.Column(db.String(255))
@@ -59,7 +56,7 @@ def signup():
 
     return jsonify({"message": "User registered successfully", "twofa_secret": twofa_secret}), 201
 
-# Generate QR Code for Google Authenticator
+# Generate QR Code 
 @app.route('/2fa_qr/<username>', methods=['GET'])
 def generate_qr(username):
     user = User.query.filter_by(username=username).first()
